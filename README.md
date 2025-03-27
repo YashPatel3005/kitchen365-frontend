@@ -39,3 +39,7 @@ Start the server
 ```bash
   npm run dev
 ```
+
+## Demo
+
+https://kitchen-365.netlify.app/

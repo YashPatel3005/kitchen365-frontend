@@ -23,17 +23,13 @@ import DataItem from "@/components/DataItem";
 export default function BasicTableOne() {
   const { dispatch, state } = useProductContext();
 
-  const [view, setView] = useState<string>(
-    typeof window !== "undefined"
-      ? localStorage.getItem("viewPreference") ?? "grid"
-      : "grid"
-  );
-
-  const [sortBy, setSortBy] = useState("created_at");
+  const [view, setView] = useState<string>("grid");
 
   const {
     products,
     setSearch,
+    sortBy,
+    setSortBy,
     setPage,
     page,
     limit,
@@ -46,20 +42,7 @@ export default function BasicTableOne() {
   const totalPages = Math.ceil(total / limit);
 
   useEffect(() => {
-    let sort = "";
-    if (sortBy) {
-      switch (sortBy) {
-        case "name":
-          sort = "name:asc";
-          break;
-        case "price":
-          sort = "price:asc";
-          break;
-        default:
-          sort = "created_at:desc";
-      }
-    }
-    fetchProducts(page, limit, search, sort);
+    fetchProducts(page, limit, search, sortBy);
   }, [page, limit, search, sortBy]);
 
   const handlePageChange = (newPage: number) => setPage(newPage);
@@ -79,7 +62,6 @@ export default function BasicTableOne() {
 
   const handleViewChange = (newView: string) => {
     setView(newView);
-    localStorage.setItem("viewPreference", newView);
   };
 
   return (
@@ -95,8 +77,19 @@ export default function BasicTableOne() {
             <div className="flex items-center gap-2 w-[180px]">
               <ArrowUpDown className="text-gray-500" size={16} />
               <Select
-                value={sortBy}
-                onValueChange={(value) => setSortBy(value)}
+                value={sortBy.split(":")[0]}
+                onValueChange={(value) => {
+                  switch (value) {
+                    case "name":
+                      setSortBy("name:asc");
+                      break;
+                    case "price":
+                      setSortBy("price:asc");
+                      break;
+                    default:
+                      setSortBy("created_at:desc");
+                  }
+                }}
               >
                 <SelectTrigger className="w-[160px] bg-white">
                   <SelectValue placeholder="Sort by" />
@@ -173,7 +166,14 @@ export default function BasicTableOne() {
         <Modal
           isOpen={state.modalOpen}
           onClose={() => dispatch({ type: "TOGGLE_MODAL", payload: false })}
-          children={<AddProduct />}
+          children={
+            <AddProduct
+              page={page}
+              limit={limit}
+              search={search}
+              sortBy={sortBy}
+            />
+          }
           className="max-w-400px p-5"
           isFullscreen={false}
           title="Add Product"
@@ -183,7 +183,14 @@ export default function BasicTableOne() {
         <Modal
           isOpen={state.deleteModalOpen}
           onClose={() => dispatch({ type: "DELETE_MODAL", payload: false })}
-          children={<DeleteProduct />}
+          children={
+            <DeleteProduct
+              page={page}
+              limit={limit}
+              search={search}
+              sortBy={sortBy}
+            />
+          }
           className="max-w-400px p-3"
           isFullscreen={false}
           title="Delete Product"

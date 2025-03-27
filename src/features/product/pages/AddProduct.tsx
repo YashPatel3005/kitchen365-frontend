@@ -7,7 +7,7 @@ import { Form, Formik } from "formik";
 import React from "react";
 import * as Yup from "yup";
 
-const AddProduct = () => {
+const AddProduct = ({ ...props }) => {
   const { dispatch, state } = useProductContext();
   const { addProduct } = useProducts();
   const initialValues: IProduct = {
@@ -29,7 +29,7 @@ const AddProduct = () => {
       price: values.price,
       ...(values.description && { description: values.description }),
     };
-    addProduct(payload);
+    addProduct({ newProduct: payload, props });
   };
 
   return (

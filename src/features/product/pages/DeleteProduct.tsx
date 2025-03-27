@@ -4,7 +4,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { CONSTANTS } from "@/lib/constants";
 import React from "react";
 
-const DeleteProduct = () => {
+const DeleteProduct = ({ ...props }) => {
   const { dispatch, state } = useProductContext();
   const { deleteProduct } = useProducts();
   return (
@@ -31,7 +31,7 @@ const DeleteProduct = () => {
             type="button"
             disabled={state.loading}
             onClick={() => {
-              deleteProduct(state.viewProduct.id);
+              deleteProduct({ id: state.viewProduct.id, props });
             }}
           >
             {state.loading

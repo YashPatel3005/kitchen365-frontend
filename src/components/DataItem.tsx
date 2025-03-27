@@ -60,8 +60,9 @@ const DataItem: React.FC<ItemProps> = ({ item, view, index, onDelete }) => {
         <div className="flex justify-between">
           <h3
             className={`
-            font-medium text-gray-900 group-hover:text-black
+            font-medium text-gray-900 group-hover:text-black truncate
             ${isGrid ? "text-lg" : "text-xl"}`}
+            style={{ maxWidth: isGrid ? "200px" : "900px" }}
           >
             {item.name}
           </h3>
