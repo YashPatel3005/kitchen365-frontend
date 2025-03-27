@@ -1,102 +1,36 @@
 "use client";
 /* eslint-disable react/no-children-prop */
 /* eslint-disable react/jsx-key */
-import React, { useEffect } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "../../components/ui/DataTable";
+import React, { useEffect, useState } from "react";
 import { Button, CustomSearchBar, Loader, Modal } from "@/components";
-import { Product, useProductContext } from "@/context/ProductContext";
+import { useProductContext } from "@/context/ProductContext";
 import { useProducts } from "@/hooks/useProducts";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Pagination from "@/components/ui/Pagination";
 import AddProduct from "./pages/AddProduct";
 import DeleteProduct from "./pages/DeleteProduct";
-import { CONSTANTS, TABLE_HEADER } from "@/lib/constants";
-import { ActionButtonProps, ProductProps } from "@/types/product";
-
-const TableHeaderComponent = () => (
-  <TableHeader className="border-b border-gray-200 font-[900] text-[18px] text-neutral-950 bg-primary">
-    <TableRow>
-      {TABLE_HEADER.map((headerItem, index) => (
-        <TableCell
-          isHeader
-          key={index}
-          className="px-5 py-3 text-neutral-950 font-[600] text-start text-theme-xs"
-        >
-          {headerItem}
-        </TableCell>
-      ))}
-    </TableRow>
-  </TableHeader>
-);
-
-const ActionButtons = ({
-  product,
-  handleFindId,
-  dispatch,
-}: ActionButtonProps) => (
-  <div className="flex ml-5">
-    <FontAwesomeIcon
-      icon={faTrash}
-      color="red"
-      className="cursor-pointer text-gray-500 opacity-70 hover:opacity-100 hover:text-red-600"
-      onClick={() => {
-        handleFindId(product.id);
-        dispatch({ type: "DELETE_MODAL", payload: true });
-      }}
-    />
-  </div>
-);
-
-const TableBodyComponent = ({
-  products,
-  isFetching,
-  handleFindId,
-  dispatch,
-}: ProductProps) => (
-  <TableBody className="divide-y divide-gray-200">
-    {products.length > 0 ? (
-      products.map((product: Product) => (
-        <TableRow key={product.id}>
-          <TableCell className="px-5 py-4 sm:px-6 text-start">
-            {product.id}
-          </TableCell>
-          <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm">
-            {product.name}
-          </TableCell>
-          <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm">
-            {product.description || "-"}
-          </TableCell>
-          <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm">
-            {product.price}
-          </TableCell>
-          <TableCell className="px-4 py-3 text-gray-500 text-theme-sm">
-            <ActionButtons
-              product={product}
-              handleFindId={handleFindId}
-              dispatch={dispatch}
-            />
-          </TableCell>
-        </TableRow>
-      ))
-    ) : (
-      <TableRow>
-        <TableCell className="px-4 py-3 text-center text-gray-500 font-[600]">
-          {isFetching ? CONSTANTS.BUTTON_LABEL.LOADING : "No data found"}
-        </TableCell>
-      </TableRow>
-    )}
-  </TableBody>
-);
+import { CONSTANTS } from "@/lib/constants";
+import ViewToggle from "@/components/ViewToggle";
+import { ArrowUpDown, PlusCircle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
+import DataItem from "@/components/DataItem";
 
 export default function BasicTableOne() {
   const { dispatch, state } = useProductContext();
+
+  const [view, setView] = useState<string>(
+    typeof window !== "undefined"
+      ? localStorage.getItem("viewPreference") ?? "grid"
+      : "grid"
+  );
+
+  const [sortBy, setSortBy] = useState("created_at");
+
   const {
     products,
     setSearch,
@@ -107,16 +41,29 @@ export default function BasicTableOne() {
     setLimit,
     fetchProducts,
     search,
-    isFetching,
   } = useProducts();
 
   const totalPages = Math.ceil(total / limit);
 
   useEffect(() => {
-    fetchProducts(page, limit, search);
-  }, [page, limit, search]);
+    let sort = "";
+    if (sortBy) {
+      switch (sortBy) {
+        case "name":
+          sort = "name:asc";
+          break;
+        case "price":
+          sort = "price:asc";
+          break;
+        default:
+          sort = "created_at:desc";
+      }
+    }
+    fetchProducts(page, limit, search, sort);
+  }, [page, limit, search, sortBy]);
 
   const handlePageChange = (newPage: number) => setPage(newPage);
+
   const handleItemsPerPageChange = (newLimit: number) => {
     setLimit(newLimit);
     setPage(1);
@@ -130,73 +77,118 @@ export default function BasicTableOne() {
       dispatch({ type: "VIEW_PRODUCT", payload: selectedProduct });
   };
 
-  return (
-    <div className="p-10">
-      {state.loading && <Loader />}
-      <div className="flex justify-end items-end">
-        <div className="mr-4">
-          <CustomSearchBar onSearch={setSearch} />
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          className="w-40 cursor-pointer"
-          onClick={() => dispatch({ type: "TOGGLE_MODAL", payload: true })}
-          startIcon={
-            <FontAwesomeIcon
-              icon={faPlus}
-              color="red"
-              className="cursor-pointer text-gray-500 opacity-70 hover:opacity-100 hover:text-red-600"
-            />
-          }
-        >
-          {CONSTANTS.LABELS.ADD_BUTTON}
-        </Button>
-      </div>
+  const handleViewChange = (newView: string) => {
+    setView(newView);
+    localStorage.setItem("viewPreference", newView);
+  };
 
-      <div className="overflow-hidden rounded-xl border border-gray-300 bg-white mt-10">
-        <div className="max-w-full overflow-x-auto">
-          <div className="min-w-[1102px]">
-            <Table>
-              <TableHeaderComponent />
-              <TableBodyComponent
-                products={products}
-                isFetching={isFetching}
-                handleFindId={handleFindId}
-                dispatch={dispatch}
-              />
-            </Table>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white px-4 py-12 md:py-20">
+      {state.loading && <Loader />}
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center mb-8">
+          <ViewToggle view={view} onChange={handleViewChange} />
+
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:gap-3">
+            <CustomSearchBar onSearch={setSearch} />
+
+            <div className="flex items-center gap-2 w-[180px]">
+              <ArrowUpDown className="text-gray-500" size={16} />
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value)}
+              >
+                <SelectTrigger className="w-[160px] bg-white">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name (A-Z)</SelectItem>
+                  <SelectItem value="created_at">Date (Newest)</SelectItem>
+                  <SelectItem value="price">Price (Lowest)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              variant="primary"
+              size="sm"
+              className="w-40 cursor-pointer text-white"
+              onClick={() => dispatch({ type: "TOGGLE_MODAL", payload: true })}
+              startIcon={<PlusCircle className="mr-1" size={16} />}
+            >
+              {CONSTANTS.LABELS.ADD_BUTTON}
+            </Button>
           </div>
         </div>
+
+        <div className="relative">
+          <div key={view} className="animate-fade-in">
+            {products.length > 0 ? (
+              view === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {products.map((item, index) => (
+                    <DataItem
+                      key={item.id}
+                      item={{ ...item, description: item.description || "" }}
+                      view="grid"
+                      index={index}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-4">
+                  {products.map((item, index) => (
+                    <DataItem
+                      key={item.id}
+                      item={{ ...item, description: item.description || "" }}
+                      view="list"
+                      index={index}
+                      onDelete={() => {
+                        handleFindId(item.id);
+                        dispatch({ type: "DELETE_MODAL", payload: true });
+                      }}
+                    />
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No products found</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {products.length > 0 && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={limit}
+            onItemsPerPageChange={handleItemsPerPageChange}
+          />
+        )}
+
+        {/* Add Product Modal */}
+        <Modal
+          isOpen={state.modalOpen}
+          onClose={() => dispatch({ type: "TOGGLE_MODAL", payload: false })}
+          children={<AddProduct />}
+          className="max-w-400px p-5"
+          isFullscreen={false}
+          title="Add Product"
+        />
+
+        {/* Delete Product Modal */}
+        <Modal
+          isOpen={state.deleteModalOpen}
+          onClose={() => dispatch({ type: "DELETE_MODAL", payload: false })}
+          children={<DeleteProduct />}
+          className="max-w-400px p-3"
+          isFullscreen={false}
+          title="Delete Product"
+        />
       </div>
-
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        itemsPerPage={limit}
-        onItemsPerPageChange={handleItemsPerPageChange}
-      />
-
-      {/* Add Product Modal */}
-      <Modal
-        isOpen={state.modalOpen}
-        onClose={() => dispatch({ type: "TOGGLE_MODAL", payload: false })}
-        children={<AddProduct />}
-        className="max-w-400px"
-        isFullscreen={false}
-        title="Add Product"
-      />
-
-      {/* Delete Product Modal */}
-      <Modal
-        isOpen={state.deleteModalOpen}
-        onClose={() => dispatch({ type: "DELETE_MODAL", payload: false })}
-        children={<DeleteProduct />}
-        className="max-w-400px"
-        isFullscreen={false}
-        title="Delete Product"
-      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #add8e6;
+  --color-primary: #171717;
 }
 .pagination-button {
   cursor: pointer;
@@ -21,6 +21,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --primary: #000000;
 }
 
 @theme inline {

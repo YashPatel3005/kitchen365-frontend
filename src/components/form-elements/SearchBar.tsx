@@ -2,8 +2,8 @@
 
 import React, { useState, ChangeEvent, useCallback } from "react";
 import { debounce } from "lodash";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRemove } from "@fortawesome/free-solid-svg-icons";
+import { Search } from "lucide-react";
+import Input from "./Input";
 
 interface CustomSearchBarProps {
   placeholder?: string;
@@ -29,30 +29,19 @@ const CustomSearchBar: React.FC<CustomSearchBarProps> = ({
     debouncedSearch(value);
   };
 
-  const handleClear = () => {
-    setQuery("");
-    onSearch("");
-  };
-
   return (
-    <div className="relative flex items-center w-full max-w-md">
-      <input
+    <div className="relative flex-1 md:max-w-xs">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <Search className="h-4 w-4 text-gray-400" />
+      </div>
+
+      <Input
         type="text"
+        placeholder={placeholder}
         value={query}
         onChange={handleChange}
-        placeholder={placeholder}
-        className="w-full pl-10 pr-10 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+        className="pl-10 w-full"
       />
-
-      {query && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="absolute right-3 text-gray-500 hover:text-gray-700 cursor-pointer"
-        >
-          <FontAwesomeIcon icon={faRemove} />
-        </button>
-      )}
     </div>
   );
 };

@@ -53,7 +53,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const contentClasses = isFullscreen
     ? "w-full h-full"
-    : "relative max-w-2xl w-full p-6 rounded-sm bg-white shadow-lg";
+    : "relative max-w-2xl w-full rounded-sm bg-white shadow-lg";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999 ">
@@ -63,17 +63,16 @@ const Modal: React.FC<ModalProps> = ({
       ></div>
       <div
         ref={modalRef}
-        className={`${contentClasses} ${className}`}
+        className={`${contentClasses}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-[500] text-[20px] ">{title}</h2>
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 cursor-pointer"
-        >
-          <FontAwesomeIcon icon={faRemove} width={30} height={30} />
-        </button>
-        <div>{children}</div>
+        <div className="bg-primary h-15 flex justify-between items-center px-4">
+          <h2 className="text-[20px] text-white font-bold">{title}</h2>
+          <button onClick={onClose} className="text-white cursor-pointer">
+            <FontAwesomeIcon icon={faRemove} width={30} height={30} />
+          </button>
+        </div>
+        <div className={`${className}`}>{children}</div>
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ const TextArea: React.FC<TextareaProps> = ({
   } else if (error) {
     textareaClasses += ` bg-transparent text-gray-400 border-red-500 focus:border-red-300 focus:ring focus:ring-error-500/10 `;
   } else {
-    textareaClasses += ` bg-transparent text-gray-400 border-gray-300 focus:border-brand-300 focus:ring focus:ring-brand-500/10 `;
+    textareaClasses += ` bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring focus:ring-brand-500/10 `;
   }
 
   return (

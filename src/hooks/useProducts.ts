@@ -8,19 +8,38 @@ import { IProduct } from "@/types/product";
 
 export function useProducts() {
   const { state, dispatch } = useProductContext();
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("price");
+  const [sortBy, setSortBy] = useState("created_at:desc");
   const [isFetching, setIsFetching] = useState(false);
 
-  const fetchProducts = async (page: number, limit: number, search: string) => {
+  const fetchProducts = async (
+    page: number,
+    limit: number,
+    search: string,
+    sortBy: string
+  ) => {
     setIsFetching(true);
     dispatch({ type: "SET_LOADING", payload: true });
     try {
+      const params: {
+        page?: number;
+        limit?: number;
+        search?: string;
+        sortBy?: string;
+      } = {};
+
+      if (page) params.page = page;
+      if (limit) params.limit = limit;
+      if (search) params.search = search;
+      if (sortBy) params.sortBy = sortBy;
+
       const { data } = await axiosInstance.get(API_ROUTES.GET_PRODUCT, {
-        params: { page, limit, search, sortBy },
+        params,
       });
+
       if (data.status) {
         dispatch({
           type: "SET_PRODUCTS",
@@ -44,9 +63,11 @@ export function useProducts() {
         API_ROUTES.POST_PRODUCT,
         newProduct
       );
+
       if (data.status) {
         dispatch({ type: "ADD_PRODUCT_SUCCESS", payload: data.data });
         dispatch({ type: "TOGGLE_MODAL", payload: false });
+
         Toast(data.message || "Product added successfully!", {
           type: "success",
         });
@@ -74,6 +95,7 @@ export function useProducts() {
       const { data } = await axiosInstance.delete(
         `${API_ROUTES.POST_PRODUCT}/${id}`
       );
+
       if (data.status) {
         Toast(data.message || "Product deleted successfully!", {
           type: "success",

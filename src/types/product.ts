@@ -12,9 +12,3 @@ export interface ProductProps {
   handleFindId: (product_id: string) => void;
   dispatch: React.Dispatch<Action>;
 }
-
-export interface ActionButtonProps {
-  product: Product;
-  handleFindId: (product_id: string) => void;
-  dispatch: React.Dispatch<Action>;
-}

@@ -34,8 +34,7 @@ const Input: FC<InputProps> = ({
   error = false,
   onBlur,
 }) => {
-  let inputClasses = ` rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none  ${className}`;
-
+  let inputClasses = `rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none  ${className}`;
   if (disabled) {
     inputClasses += ` text-gray-500 border-gray-300 cursor-not-allowed `;
   } else if (error) {
